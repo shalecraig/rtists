@@ -16,6 +16,8 @@ require_relative 'lib'
 
 TODOs:
 [x] Unified "artist" types
+[ ] Followed albums https://developer.spotify.com/web-api/get-users-saved-albums/
+[ ] Followed tracks https://developer.spotify.com/web-api/get-users-saved-tracks/
 [x] DB usage
 [x] Persist artists
 [ ] Unified "event" types
