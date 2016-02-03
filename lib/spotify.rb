@@ -49,7 +49,6 @@ class SpotifyClient
       }
     )
     access_token = auth_request['access_token']
-    puts "Spotify access token: #{access_token}" if @verbose
     config = {
       :access_token => access_token,  # initialize the client with an access token to perform authenticated calls
     }.merge(DEFAULT_CONFIG)
