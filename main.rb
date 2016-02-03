@@ -58,7 +58,6 @@ sg = SeatGeek::Connection.new({:protocol => :https})
 progress = ProgressBar.create( :format         => '%a %bᗧ%i %p%% %t',
                     :progress_mark  => ' ',
                     :remainder_mark => '･')
-
 progress.total = artists.length
 iter = 0
 artists.each do |artist|
