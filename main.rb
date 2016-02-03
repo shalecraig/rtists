@@ -66,7 +66,7 @@ artists.each do |artist|
   next if sg_events.empty?
   progress.log("#{artist.name}:")
 
-  sh_events.each do |event|
+  sg_events.each do |event|
     title = event.act_primary
     venue_name = event.name_primary
     venue_city = event.city
