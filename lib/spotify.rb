@@ -68,45 +68,38 @@ class SpotifyClient
 
   ITER_LIMIT = 50
   def fav_tracks
-    offset = 0
-    tracks = []
-    progress = ProgressBar.create
-    using_progress = false
-    while true do
-      iter = @client.send(:run, :get, "/v1/me/tracks?offset=#{offset}&limit=#{ITER_LIMIT}", [200])
-      using_progress = (iter['total'] > ITER_LIMIT*2)
-      progress.total = iter['total'] if using_progress
-      progress.progress += iter['items'].length if using_progress
-      tracks += iter['items']
-      offset += iter['items'].length
-      if offset >= iter['total']
-        break
-      end
+    iterate_over_results do |offset|
+      @client.send(:run, :get, "/v1/me/tracks?offset=#{offset}&limit=#{ITER_LIMIT}", [200])
     end
-    tracks
   end
 
   def followed_artists
-    raw_artists = []
-    offset = 0
-    using_progress = false
-    total = false
-    while true do
-      iter = @client.send(:run, :get, "v1/me/following?type=artist&offset=#{offset}&limit=50", [200])
-      total = iter['artists']['total']
-      using_progress = (total > ITER_LIMIT*2)
-      progress.total = total if using_progress
-      progress.progress += iter['artists'].length if using_progress
-      raw_artists += iter['artists']['items']
-      offset += 50
-      break if offset >= iter['artists']['total']
+    iterate_over_results do |offset|
+      @client.send(:run, :get, "v1/me/following?type=artist&offset=#{offset}&limit=50", [200])['artists']
     end
-    raw_artists
   end
 
   private
 
-  def do_shitty_thing(send_lambda)
+  def iterate_over_results(&block)
+    result = []
+    offset = 0
+    progress = ProgressBar.create
+    using_progress = false
+    while true do
+      iter = yield(offset)
+      total = iter['total']
+      items = iter['items']
+
+      using_progress = (total > ITER_LIMIT*2)
+      progress.total = total if using_progress
+      progress.progress += items.length if using_progress
+
+      result += items
+      offset += items.length
+      break if offset >= total
+    end
+    result
   end
 
   def initialize(verbose: false)
