@@ -1,5 +1,6 @@
 require 'yaml'
 require 'pry'
+require 'configatron'
 
 secrets = YAML.load_file('secrets.yaml')
 

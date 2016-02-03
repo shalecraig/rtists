@@ -6,7 +6,6 @@ require 'seatgeek'
 require 'slugify'
 require 'spotify-client'
 require 'stubhub'
-require 'configatron'
 
 require_relative 'config'
 require_relative 'models'
