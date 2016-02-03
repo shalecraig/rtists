@@ -30,28 +30,19 @@ TODOs:
 EOF
 
 def self.get_artists_from_fav_tracks(spotify)
-  tracks = spotify.fav_tracks
-  tracks.
+  spotify.
+    fav_tracks.
     flat_map { |t| t['track']['artists'] }.
     uniq { |r| r['id'] }.
     flat_map { |a| Artist.from_spotify_artist_blob(a) }
 end
 
 def self.get_followed_artists(spotify)
-  raw_artists = []
-  offset = 0
-  while true do
-    artists_list = spotify.wrapped.send(:run, :get, "v1/me/following?type=artist&offset=#{offset}&limit=50", [200])
-    raw_artists += artists_list['artists']['items']
-    offset += 50
-    if offset >= artists_list['artists']['total']
-      break
-    end
-  end
-
-  raw_artists.
+  spotify.
+    followed_artists.
     flat_map { |a| Artist.from_spotify_artist_blob(a) }
 end
+
 spotify = SpotifyClient.instance
 followed_artists = get_followed_artists(spotify)
 track_artists = get_artists_from_fav_tracks(spotify)

@@ -73,20 +73,42 @@ class SpotifyClient
     progress = ProgressBar.create
     using_progress = false
     while true do
-      track_iter = @client.send(:run, :get, "/v1/me/tracks?offset=#{offset}&limit=#{ITER_LIMIT}", [200])
-      using_progress = (track_iter['total'] > ITER_LIMIT*2)
-      progress.total = track_iter['total'] if using_progress
-      progress.progress += track_iter['items'].length if using_progress
-      tracks += track_iter['items']
-      offset += track_iter['items'].length
-      if offset >= track_iter['total']
+      iter = @client.send(:run, :get, "/v1/me/tracks?offset=#{offset}&limit=#{ITER_LIMIT}", [200])
+      using_progress = (iter['total'] > ITER_LIMIT*2)
+      progress.total = iter['total'] if using_progress
+      progress.progress += iter['items'].length if using_progress
+      tracks += iter['items']
+      offset += iter['items'].length
+      if offset >= iter['total']
         break
       end
     end
     tracks
   end
 
+  def followed_artists
+    raw_artists = []
+    offset = 0
+    using_progress = false
+    total = false
+    while true do
+      iter = @client.send(:run, :get, "v1/me/following?type=artist&offset=#{offset}&limit=50", [200])
+      total = iter['artists']['total']
+      using_progress = (total > ITER_LIMIT*2)
+      progress.total = total if using_progress
+      progress.progress += iter['artists'].length if using_progress
+      raw_artists += iter['artists']['items']
+      offset += 50
+      break if offset >= iter['artists']['total']
+    end
+    raw_artists
+  end
+
   private
+
+  def do_shitty_thing(send_lambda)
+  end
+
   def initialize(verbose: false)
     @refreshed = false
     @verbose = verbose
