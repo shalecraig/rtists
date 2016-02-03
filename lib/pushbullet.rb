@@ -1,3 +1,5 @@
+require 'configatron'
+
 class PushBulletClient
   def self.client
     @instance ||= PushBulletClient.new
