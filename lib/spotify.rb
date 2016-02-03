@@ -71,11 +71,12 @@ class SpotifyClient
     offset = 0
     tracks = []
     progress = ProgressBar.create
-    progress.total = 100
+    using_progress = false
     while true do
       track_iter = @client.send(:run, :get, "/v1/me/tracks?offset=#{offset}&limit=#{ITER_LIMIT}", [200])
-      progress.total = track_iter['total']
-      progress.progress += track_iter['items'].length
+      using_progress = (track_iter['total'] > ITER_LIMIT*2)
+      progress.total = track_iter['total'] if using_progress
+      progress.progress += track_iter['items'].length if using_progress
       tracks += track_iter['items']
       offset += track_iter['items'].length
       if offset >= track_iter['total']

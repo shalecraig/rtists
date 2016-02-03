@@ -18,8 +18,8 @@ TODOs:
 [x] Unified "artist" types
 [x] DB usage
 [x] Persist artists
-[ ] Persist events
 [ ] Unified "event" types
+[ ] Persist events
 [ ] Being able to compute the difference in prices wrt time
 [ ] Separation of API from responses
 [ ] Stubhub api
@@ -31,18 +31,9 @@ EOF
 
 def self.get_artists_from_fav_tracks(spotify)
   tracks = spotify.fav_tracks
-
-  artists_meta = {}
-  tracks.map {|t| t['track'] }.each do |track|
-    artists = track['artists']
-    artists.each do |artist|
-      id = artist['id']
-      artists_meta[id] = {tracks: [], name: artist['name'], artist: artist} unless artists_meta.has_key?(id)
-      artists_meta[id][:tracks] << track
-    end
-  end
-  artists = tracks.
-    flat_map {|t| t['track']['artists']}.
+  tracks.
+    flat_map { |t| t['track']['artists'] }.
+    uniq { |r| r['id'] }.
     flat_map { |a| Artist.from_spotify_artist_blob(a) }
 end
 
