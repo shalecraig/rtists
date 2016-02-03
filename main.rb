@@ -15,18 +15,19 @@ require_relative 'lib'
 
 TODOs:
 [x] Unified "artist" types
-[ ] Followed albums https://developer.spotify.com/web-api/get-users-saved-albums/
-[ ] Followed tracks https://developer.spotify.com/web-api/get-users-saved-tracks/
 [x] DB usage
 [x] Persist artists
 [x] Event type
 [x] Persist events
+[x] Notifications about new events
+[ ] Followed albums https://developer.spotify.com/web-api/get-users-saved-albums/
+[ ] Followed tracks https://developer.spotify.com/web-api/get-users-saved-tracks/
 [ ] Being able to compute the difference in prices wrt time
 [ ] Separation of API from responses
 [ ] Stubhub api
 [ ] Ticketfly api
 [ ] Async running (nightly? 12/6h?)
-[ ] Notifications about the deltas
+[ ] Notifications about price drops/raises
 
 EOF
 
@@ -92,6 +93,7 @@ artists.each do |artist|
     datetime_local = event['datetime_utc'] + " UTC"
     parsed = Time.parse(datetime_local)
     event_timestamp = parsed.localtime.strftime('%a %b %e, %k:%M')
+    short_ts = parsed.localtime.strftime('%b %e (%a)')
 
     score = event['score']
 
@@ -99,6 +101,9 @@ artists.each do |artist|
     if !prior_event
       prior_string = " 🎉🎉🎉🎉"
       Event.create(seatgeek_id: id, title: title)
+      short_title = "New #{artist.name} Concert!"
+      short_description = "#{title} - #{short_ts} @ #{venue_city}"
+      PushBulletClient.send_message(short_title, short_description)
     end
 
     pricing_string = if best_price < 100_000_000

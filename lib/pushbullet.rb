@@ -23,7 +23,6 @@ module PushBulletClient
     headers = (headers || {}).merge(default_headers)
     raise "urls must start with a slash - #{uri} doesn't" unless uri.start_with?('/')
     url = "#{base_url}#{uri}"
-    puts "#{method.to_s.upcase} -> #{url}"
 
     case method.to_sym
     when :post
