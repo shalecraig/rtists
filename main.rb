@@ -31,23 +31,17 @@ TODOs:
 
 EOF
 
-def self.get_artists_from_fav_tracks(spotify)
-  spotify.
-    fav_tracks.
-    flat_map { |t| t['track']['artists'] }.
-    uniq { |r| r['id'] }.
-    flat_map { |a| Artist.from_spotify_artist_blob(a) }
-end
-
-def self.get_followed_artists(spotify)
-  spotify.
-    followed_artists.
-    flat_map { |a| Artist.from_spotify_artist_blob(a) }
-end
-
 spotify = SpotifyClient.instance
-followed_artists = get_followed_artists(spotify)
-track_artists = get_artists_from_fav_tracks(spotify)
+followed_artists =   spotify.
+  followed_artists.
+  flat_map { |a| Artist.from_spotify_artist_blob(a) }
+
+track_artists = spotify.
+  fav_tracks.
+  flat_map { |t| t['track']['artists'] }.
+  uniq { |r| r['id'] }.
+  flat_map { |a| Artist.from_spotify_artist_blob(a) }
+
 artists = (track_artists + followed_artists).uniq { |a| a.spotify_id ? a.spotify_id : a.name }
 puts "Found #{track_artists.length} from tracks, and #{followed_artists.length} being followed - #{artists.length} total unique artists."
 
