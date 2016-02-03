@@ -67,19 +67,19 @@ artists.each do |artist|
   progress.log("#{artist.name}:")
 
   sh_events.each do |event|
-      title = event.act_primary
-      venue_name = event.name_primary
-      venue_city = event.city
-      event_timestamp = "wat"
+    title = event.act_primary
+    venue_name = event.name_primary
+    venue_city = event.city
+    event_timestamp = "wat"
 
-      min = [event.minPrice, event.maxPrice].min
-      pricing_string = " Tickets ~$#{min}"
+    min = [event.minPrice, event.maxPrice].min
+    pricing_string = " Tickets ~$#{min}"
 
-      min_list = event.minListPrice
-      if min_list && min_list < min
-        pricing_string += " (#{min_list} is good)"
-      end
+    min_list = event.minListPrice
+    if min_list && min_list < min
+      pricing_string += " (#{min_list} is good)"
+    end
 
-      progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp} #{pricing_string} "
+    progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp} #{pricing_string} "
   end
 end
