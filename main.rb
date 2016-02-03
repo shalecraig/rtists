@@ -49,12 +49,6 @@ logger.level = Logger::WARN
 SeatGeek::Connection.logger = logger
 sg = SeatGeek::Connection.new({:protocol => :https})
 
-# Interesting
-# sg.events({'performers.slug' => 'justin-bieber'}) -> works
-# sg.events({'performers.slug' => 'Justin-Bieber'}) -> Doesn't Work
-# sg.events({'performers.slug' => 'Justin Bieber'}) -> Doesn't Work
-# sg.events({'performers.slug' => 'Justin+Bieber'}) -> Doesn't Work
-
 progress = ProgressBar.create( :format         => '%a %bᗧ%i %p%% %t',
                     :progress_mark  => ' ',
                     :remainder_mark => '･')
@@ -66,21 +60,10 @@ artists.each do |artist|
   result = sg.events({'performers.slug' => slug, 'geoip' => true})
   sg_events = result['events']
 
-  sh_events = nil
-  # while sh_events.nil? do
-  #   begin
-  #     sh_events = Stubhub::Event.search(name, city: CGI::escape('San Francisco'), state: 'CA')
-  #   rescue
-  #   end
-  # end
-  sh_events ||= []
-  sh_events = sh_events.
-    select { |e| e.eventLocation_facet_str.downcase.include?('sf') || e.eventLocation_facet_str.downcase.include?('bay area') }
-
   progress.increment
   iter += 1
 
-  next if (sh_events || []).empty? && (sg_events || []).empty?
+  next if sg_events.empty?
   progress.log("#{artist.name}:")
 
   sh_events.each do |event|
@@ -98,44 +81,5 @@ artists.each do |artist|
       end
 
       progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp} #{pricing_string} "
-  end
-
-  # best_id = sg_events.max { |e| e['score'] }['id']
-  sg_events.sort { |e| e['score']}.reverse.each do |event|
-    # best = event['id'] == best_id
-    stats = event['stats']
-    venue = event['venue']
-      venue_city = venue['city']
-      venue_name = venue['name']
-      venue_country = venue['country']
-      venue_state = venue['state']
-      venue_score = venue['score']
-
-    # listing details
-    listing_count = stats['listing_count']
-
-    average_price = stats['average_price']
-    lowest_price_good_deals = stats['lowest_price_good_deals']
-    lowest_price = stats['lowest_price']
-    highest_price = stats['highest_price']
-    best_price = [average_price, lowest_price_good_deals, lowest_price, highest_price, 100_000_000].compact.min
-
-    title = event['title']
-
-    # TODO: determine event time
-    datetime_local = event['datetime_utc'] + " UTC"
-    parsed = Time.parse(datetime_local)
-    # event_timestamp = 'Tue Jan 1, 18:30'
-    # TODO: use the right tz in this form.
-    event_timestamp = parsed.localtime.strftime('%a %b %e, %k:%M')
-
-    score = event['score']
-
-    pricing_string = if best_price < 100_000_000
-      " Tickets ~$#{best_price}"
-    else
-      ""
-    end
-    progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp} [#{score}]#{pricing_string} "
   end
 end
