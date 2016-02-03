@@ -44,7 +44,6 @@ class SpotifyClient
       body: {
         grant_type: 'refresh_token',
         refresh_token: configatron.spotify.refresh_token,
-        # redirect_uri: 'http://localhost/',
         client_id: configatron.spotify.client_id,
         client_secret: configatron.spotify.client_secret,
       }
