@@ -59,6 +59,8 @@ artists.each do |artist|
   slug = artist.name.slugify
 
   result = sg.events({'performers.slug' => slug, 'geoip' => true})
+  # result = sg.events({'performers.slug' => slug, 'geoip' => 'H3R 1K2'}) # Montreal
+  # TODO: make locations selectable?
   sg_events = result['events']
 
   progress.increment
