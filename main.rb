@@ -1,5 +1,6 @@
 require 'httparty'
 require 'logger'
+require 'optparse'
 require 'pry'
 require 'ruby-progressbar'
 require 'seatgeek'
@@ -31,42 +32,69 @@ TODOs:
 
 EOF
 
-spotify = SpotifyClient.instance
-followed_artists =   spotify.
-  followed_artists.
-  flat_map { |a| Artist.from_spotify_artist_blob(a) }
+options = {
+  update_spotify: true
+}
+OptionParser.new do |opts|
+  opts.on('-c', '--use-spotify-cache', "Skip reloading Spotify Fav'd Artists") do
+    options[:update_spotify] = false
+  end
+end.parse!
 
-track_artists = spotify.
-  fav_tracks.
-  flat_map { |t| t['track']['artists'] }.
-  uniq { |r| r['id'] }.
-  flat_map { |a| Artist.from_spotify_artist_blob(a) }
+if options[:update_spotify]
+  spotify = SpotifyClient.instance
+  followed_artists = spotify.
+    followed_artists.
+    flat_map { |a| Artist.from_spotify_artist_blob(a) }
 
-artists = (track_artists + followed_artists).uniq { |a| a.spotify_id ? a.spotify_id : a.name }
-puts "Found #{track_artists.length} from tracks, and #{followed_artists.length} being followed - #{artists.length} total unique artists."
+  track_artists = spotify.
+    fav_tracks.
+    flat_map { |t| t['track']['artists'] }.
+    uniq { |r| r['id'] }.
+    flat_map { |a| Artist.from_spotify_artist_blob(a) }
+
+  artists = (track_artists + followed_artists).uniq { |a| a.spotify_id ? a.spotify_id : a.name }
+  puts "Found #{track_artists.length} from tracks, and #{followed_artists.length} being followed - #{artists.length} total unique artists."
+else
+  artists = Artist.all.uniq { |a| a.spotify_id ? a.spotify_id : a.name }
+  puts "Using cached artists - #{artists.length} found."
+end
 
 logger = Logger.new(STDOUT)
 logger.level = Logger::WARN
 SeatGeek::Connection.logger = logger
 sg = SeatGeek::Connection.new({:protocol => :https})
 
-progress = ProgressBar.create( :format         => '%a %bᗧ%i %p%% %t',
-                    :progress_mark  => ' ',
-                    :remainder_mark => '･')
+progress = ProgressBar.create(
+  :format => '%a %bᗧ%i %p%% %t',
+  :progress_mark  => ' ',
+  :remainder_mark => '･',
+)
+
 progress.total = artists.length
 iter = 0
 artists.each do |artist|
   slug = artist.name.slugify
+  if slug.empty?
+    progress.log "Skipped empty slug from #{artist.name}"
+    next
+  end
 
   result = sg.events({'performers.slug' => slug, 'geoip' => true})
-  # result = sg.events({'performers.slug' => slug, 'geoip' => 'H3R 1K2'}) # Montreal
+  # result = sg.events({'performers.slug' => slug, 'geoip'=>'167.114.42.219'}) # Montreal
   # TODO: make locations selectable?
   sg_events = result['events']
 
   progress.increment
   iter += 1
 
-  next if sg_events.empty?
+  if !sg_events
+    progress.log("Empty result for #{slug}")
+    progress.log(result)
+    next
+  elsif sg_events.empty?
+    next
+  end
   progress.log("#{artist.name}:")
 
   sg_events.sort { |e| e['score']}.reverse.each do |event|
