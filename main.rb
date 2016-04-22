@@ -81,7 +81,9 @@ artists.each do |artist|
   end
 
   result = sg.events({'performers.slug' => slug, 'geoip' => true})
+  # result = sg.events({'performers.slug' => slug, 'geoip'=>'206.196.115.38'}) # STL
   # result = sg.events({'performers.slug' => slug, 'geoip'=>'167.114.42.219'}) # Montreal
+  # result = sg.events({'performers.slug' => slug, 'geoip'=>'192.206.151.131'}) # Toronto
   # TODO: make locations selectable?
   sg_events = result['events']
 
