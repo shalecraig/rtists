@@ -80,7 +80,8 @@ artists.each do |artist|
     next
   end
 
-  result = sg.events({'performers.slug' => slug, 'geoip' => true})
+  # result = sg.events({'performers.slug' => slug, 'geoip' => true}) # "Local"
+  result = sg.events({'performers.slug' => slug, 'geoip'=>'208.113.83.165'}) # SF
   # result = sg.events({'performers.slug' => slug, 'geoip'=>'206.196.115.38'}) # STL
   # result = sg.events({'performers.slug' => slug, 'geoip'=>'167.114.42.219'}) # Montreal
   # result = sg.events({'performers.slug' => slug, 'geoip'=>'192.206.151.131'}) # Toronto
