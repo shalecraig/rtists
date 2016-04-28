@@ -129,8 +129,6 @@ artists.each do |artist|
     event_timestamp = parsed.localtime.strftime('%a %b %e, %k:%M')
     short_ts = parsed.localtime.strftime('%b %e (%a)')
 
-    score = event['score']
-
     prior_string = ""
     if !prior_event
       prior_string = " 🎉🎉🎉🎉"
@@ -145,6 +143,11 @@ artists.each do |artist|
     else
       ""
     end
-    progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp} [#{score}]#{pricing_string}#{prior_string}"
+    score_string = if venue_score
+      " [#{venue_score}]"
+    else
+      ""
+    end
+    progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp}#{score_string}#{pricing_string}#{prior_string}"
   end
 end
