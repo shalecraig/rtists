@@ -100,7 +100,8 @@ artists.each do |artist|
   end
   progress.log("#{artist.name}:")
 
-  sg_events.sort { |e| e['score']}.reverse.each do |event|
+  # Handle nil scores
+  sg_events.sort { |e| e['score'] || 0}.reverse.each do |event|
     id = event['id']
     stats = event['stats']
     venue = event['venue']
