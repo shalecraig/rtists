@@ -151,6 +151,8 @@ def main
       progress.log  "\t - #{title} @#{venue_name} (#{venue_city}) on #{event_timestamp}#{score_string}#{pricing_string}#{prior_string}"
     end
   end
+rescue => e
+  PushBulletClient.send_message('Failed execution!', e)
 end
 
 main
